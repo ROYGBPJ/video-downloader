@@ -8,21 +8,24 @@
 </head>
 <body>
   <main>
-    <header>
-      <div class="logo">↓</div>
-      <div><h1>Video Downloader</h1><p>Find media on this page</p></div>
-    </header>
+    <header><div class="logo">↓</div><div><h1>Video Downloader</h1><p>Direct media + yt-dlp backend</p></div></header>
     <section class="current">
       <label for="pageUrl">Current page</label>
       <div class="urlrow"><input id="pageUrl" readonly><button id="scan" class="secondary">Scan</button></div>
     </section>
-    <div id="notice" class="notice" role="status">Scanning current page…</div>
-    <section class="toolbar">
-      <span id="count">0 media files</span>
-      <button id="downloadAll" disabled>Download all</button>
+    <section class="backend">
+      <div class="backend-heading"><strong>yt-dlp backend</strong><span id="backendStatus" class="status">Checking…</span></div>
+      <p class="hint">Requires the local companion service, yt-dlp, and FFmpeg.</p>
+      <label for="backendUrl">Video or supported site URL</label>
+      <input id="backendUrl" type="url" placeholder="https://www.youtube.com/watch?v=…" autocomplete="url">
+      <div class="urlrow"><label class="mode-label" for="downloadMode">Format</label><select id="downloadMode"><option value="video">Best available video</option><option value="mp3">Extract audio to MP3</option></select></div>
+      <button id="backendDownload" class="wide" disabled>Download with yt-dlp</button>
+      <p class="hint">Downloads run on your computer through the local service. Only use URLs and content you are authorized to save.</p>
     </section>
+    <div id="notice" class="notice" role="status">Scanning current page…</div>
+    <section class="toolbar"><span id="count">0 media files</span><button id="downloadAll" disabled>Download all direct links</button></section>
     <section id="results" class="results"><p class="empty">Open a page containing a video or audio file, then scan.</p></section>
-    <footer>Downloads files the webpage exposes directly. Some sites use segmented or protected streams that cannot be downloaded as a single media file by a browser extension alone. Only download content you are authorized to save.</footer>
+    <footer>Direct-link downloads use Chrome. yt-dlp supports many sites, but availability depends on the site and installed version. MP3 extraction requires FFmpeg. This extension does not bypass DRM or other access controls.</footer>
   </main>
   <script src="popup.js"></script>
 </body>
