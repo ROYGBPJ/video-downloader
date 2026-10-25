@@ -30,6 +30,12 @@ try {
     Write-Host "  $(Join-Path $FfmpegBin 'ffmpeg.exe')"
     Write-Host "  $(Join-Path $FfmpegBin 'ffprobe.exe')"
     Write-Host "The downloaded executables are local project files; they are not embedded into Chrome itself."
+    $NodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
+    if ($NodeCommand) {
+        Write-Host "Node.js runtime found: $($NodeCommand.Source)"
+    } else {
+        Write-Warning "Node.js was not found on PATH. Some YouTube downloads may fail; install Node.js and reopen the terminal."
+    }
 }
 finally {
     if (Test-Path -LiteralPath $TempRoot) {
