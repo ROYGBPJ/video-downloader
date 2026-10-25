@@ -45,7 +45,7 @@ def extension_origin(handler):
     return origin.startswith("chrome-extension://") and len(origin) < 256
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VideoDownloaderLocal/1.1"
+    server_version = "VideoDownloaderLocal/1.2"
 
     def log_message(self, fmt, *args):
         sys.stderr.write("[VideoDownloader] request handled\n")
@@ -91,7 +91,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not extension_origin(self):
-            return self.send_json(403, {"ok": False, "error": "Only Chrome extension requests are allowed."})
+            return self.send_json(403, {"ok": False, "error": "Only Chrome extension requests are allowed."}, origin=None)
         origin = self.headers.get("Origin")
         if urlparse(self.path).path != "/download":
             return self.send_json(404, {"ok": False, "error": "Not found."}, origin)
@@ -116,11 +116,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(400, {"ok": False, "error": "Mode must be video or mp3."}, origin)
         ytdlp = executable("yt-dlp")
         ffmpeg = executable("ffmpeg")
-        ffprobe = executable("ffprobe")
         if not ytdlp:
-            return self.send_json(503, {"ok": False, "error": "Project-local yt-dlp is missing. Run backend/setup-tools-windows.bat."}, origin)
+            return self.send_json(503, {"ok": False, "error": "Project-local yt-dlp is missing. Run backend/setup-and-run-windows.ps1."}, origin)
         if mode == "mp3" and not ffmpeg:
-            return self.send_json(503, {"ok": False, "error": "Project-local FFmpeg is missing. Run backend/setup-tools-windows.bat."}, origin)
+            return self.send_json(503, {"ok": False, "error": "Project-local FFmpeg is missing. Run backend/setup-and-run-windows.ps1."}, origin)
 
         job_id = uuid.uuid4().hex
         log_path = OUTPUT_DIR / (job_id + ".log")
@@ -145,9 +144,9 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     if not executable("yt-dlp"):
-        print("yt-dlp is missing. Run backend/setup-tools-windows.bat to place it inside this project.")
+        print("yt-dlp is missing. Run backend/setup-and-run-windows.ps1 to place it inside this project.")
     if not executable("ffmpeg") or not executable("ffprobe"):
-        print("FFmpeg is missing. Run backend/setup-tools-windows.bat to place it inside this project.")
+        print("FFmpeg is missing. Run backend/setup-and-run-windows.ps1 to place it inside this project.")
     print("Video Downloader local service listening on http://127.0.0.1:8765")
     print("Project tools folder: " + str(TOOLS_DIR))
     print("Downloads folder: " + str(OUTPUT_DIR))
