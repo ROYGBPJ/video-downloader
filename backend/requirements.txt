@@ -1,0 +1,2 @@
+# The local bridge uses only the Python standard library.
+# Install yt-dlp and FFmpeg separately and ensure both executables are on PATH.
