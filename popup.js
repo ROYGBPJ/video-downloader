@@ -73,7 +73,7 @@ async function scanPage() {
     renderItems();
     const host = new URL(tab.url).hostname;
     if (/(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(host)) {
-      setNotice("YouTube detected. This extension can download direct media URLs exposed to the page, but YouTube's adaptive streams are not exposed as ordinary file URLs here.", true);
+      setNotice("Actual YouTube video extraction is not implemented yet. YouTube uses adaptive streaming, so its video and audio are not normally available as ordinary direct file links. Successful YouTube downloads have not been verified, and this extension has not been tested in Chrome.", true);
     } else {
       setNotice(mediaItems.length ? "Found media URLs exposed directly by this page." : "No direct media files found. Try opening the media itself in a tab.");
     }
