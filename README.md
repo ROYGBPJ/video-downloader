@@ -1,32 +1,48 @@
-# Video Downloader — Chrome Extension
+# Video Downloader — Chrome Extension + yt-dlp
 
-This project is a Chrome Manifest V3 browser extension, not a Python desktop app.
+A Chrome Manifest V3 extension with two download paths:
+- **Direct media:** find ordinary video/audio URLs exposed by the current page and download them with Chrome.
+- **yt-dlp companion service:** use the installed yt-dlp command-line downloader for YouTube and many other supported sites.
+- **MP3 extraction:** use FFmpeg through yt-dlp's audio-extraction options.
+- **No artificial extension queue-count or file-size cap.** Actual limits still depend on the website, storage, Chrome, and the tools involved.
 
-## Features
-- Scans the active webpage for directly exposed video/audio URLs and media-file links.
-- Supports common direct media formats including MP4, WebM, MOV, MKV, MP3, M4A, WAV, OGG, and FLAC.
-- Downloads one item or all discovered items using Chrome's built-in download manager.
-- Does not add an artificial queue-count or file-size limit. Actual limits are determined by Chrome, the operating system, the server, and the website.
-- Works on sites that expose downloadable media URLs to the page.
+## Requirements for yt-dlp downloads
+- Python 3.9+ for the local bridge.
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp), installed and available on your PATH.
+- [FFmpeg](https://ffmpeg.org/download.html), with ffmpeg available on your PATH. FFmpeg is required for MP3 extraction and often helps merge separate video/audio streams.
+- Google Chrome.
 
-## Install in Chrome
-1. Download or clone this repository.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode**.
-4. Select **Load unpacked**.
-5. Choose the repository folder containing `manifest.json`.
-6. Open a webpage with a directly accessible media file, click the extension icon, then select **Scan** or **Download all**.
+Update yt-dlp regularly because supported sites can change.
 
-## Site compatibility and testing status
-Many websites expose ordinary media file URLs. Other sites use segmented streaming, short-lived signed URLs, authentication, or protected playback.
+## Windows setup
+1. Install Python 3 and make sure the Python launcher (py) or python command works.
+2. Install yt-dlp using its official instructions. For example, if Python's pip is available, run **py -m pip install -U yt-dlp**.
+3. Install FFmpeg and add its bin directory to your Windows PATH. Open a new terminal and verify **yt-dlp --version** and **ffmpeg -version**.
+4. In this repository, double-click **backend/start-windows.bat**. Keep its terminal window open while using the extension.
+5. Open chrome://extensions, enable **Developer mode**, choose **Load unpacked**, and select the repository folder containing manifest.json.
+6. Open a video page, click the extension icon, paste the page URL into **Video or supported site URL**, choose video or MP3, and click **Download with yt-dlp**.
+7. Files are saved under the Downloads folder named VideoDownloader in your user profile. Diagnostic .log files are also written there.
 
-**Actual YouTube video extraction is not implemented yet.** YouTube uses adaptive streaming, so its video and audio are not normally available as ordinary direct file links. The extension currently detects YouTube and displays a notice; it does not implement extraction of YouTube's adaptive streams. Successful YouTube downloads have not been verified, and the extension has not been tested in Chrome. Compatibility with other sites depends on whether they expose directly downloadable media URLs.
+## Other operating systems
+Install Python 3, yt-dlp, and FFmpeg using their official instructions, then run **python3 backend/server.py** from the repository root (or run **python3 server.py** from the backend directory). Keep the service running while using the extension.
 
-Do not use this extension to bypass DRM, access controls, or website restrictions.
+## Security notes
+- The companion service binds only to 127.0.0.1 and accepts requests from Chrome extension origins, not ordinary websites.
+- It invokes yt-dlp with a fixed set of arguments; it does not accept arbitrary command-line arguments.
+- The service accepts HTTP/HTTPS URLs. Use it only with content you own, have permission to download, or are otherwise authorized to save. Respect site terms and applicable law. It does not implement DRM circumvention.
+- Downloads happen on the computer where the companion service is running; the extension cannot bundle or silently install yt-dlp or FFmpeg.
+- Do not expose the local service port to your network.
 
-Only download content you own, have permission to save, or are otherwise authorized to download. Respect applicable law and each site's terms.
+## Direct-link mode
+Direct-link mode scans the active page for common media files such as MP4, WebM, MOV, MKV, MP3, M4A, WAV, OGG, and FLAC, and uses Chrome's built-in download manager. Some sites do not expose direct media URLs, so use the yt-dlp companion mode when the site is supported.
+
+## Limitations and test status
+Site support is controlled by yt-dlp and the target site's current behavior; no claim is made that every site works. MP3 conversion depends on FFmpeg and the source's audio availability. This repository update has not yet been runtime-tested in Chrome or end-to-end with installed yt-dlp/FFmpeg.
 
 ## Project files
-- `manifest.json` — extension configuration
-- `popup.html`, `popup.css`, `popup.js` — popup interface and scan/download controls
-- `background.js` — page scanning and Chrome Downloads API
+- manifest.json — extension permissions and popup.
+- popup.html, popup.css, popup.js — user interface and controls.
+- background.js — direct media scanning and downloads.
+- backend/server.py — local HTTP bridge to yt-dlp.
+- backend/start-windows.bat — Windows launcher.
+- backend/requirements.txt — notes about Python dependencies.
