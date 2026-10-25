@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Localhost bridge allowing the Chrome extension to invoke yt-dlp."""
+"""Localhost bridge allowing the Chrome extension to invoke project-local yt-dlp."""
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -12,10 +12,23 @@ import uuid
 
 HOST = "127.0.0.1"
 PORT = 8765
+BACKEND_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = BACKEND_DIR.parent
+TOOLS_DIR = PROJECT_DIR / "tools"
+FFMPEG_BIN = TOOLS_DIR / "ffmpeg" / "bin"
 OUTPUT_DIR = Path.home() / "Downloads" / "VideoDownloader"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def executable(name):
+    """Prefer binaries installed inside this project, then use PATH as a fallback."""
+    candidates = []
+    if name == "yt-dlp":
+        candidates.extend([TOOLS_DIR / "yt-dlp.exe", TOOLS_DIR / "yt-dlp"])
+    elif name in ("ffmpeg", "ffprobe"):
+        candidates.extend([FFMPEG_BIN / (name + ".exe"), FFMPEG_BIN / name])
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
     return shutil.which(name) or shutil.which(name + ".exe")
 
 def safe_http_url(value):
@@ -32,10 +45,9 @@ def extension_origin(handler):
     return origin.startswith("chrome-extension://") and len(origin) < 256
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VideoDownloaderLocal/1.0"
+    server_version = "VideoDownloaderLocal/1.1"
 
     def log_message(self, fmt, *args):
-        # Do not log URLs, which may contain private query parameters.
         sys.stderr.write("[VideoDownloader] request handled\n")
 
     def send_json(self, status, payload, origin=None):
@@ -72,6 +84,8 @@ class Handler(BaseHTTPRequestHandler):
             "ok": True,
             "yt_dlp": bool(executable("yt-dlp")),
             "ffmpeg": bool(executable("ffmpeg")),
+            "ffprobe": bool(executable("ffprobe")),
+            "tools_location": str(TOOLS_DIR),
             "output_dir": str(OUTPUT_DIR)
         }, origin)
 
@@ -102,16 +116,18 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(400, {"ok": False, "error": "Mode must be video or mp3."}, origin)
         ytdlp = executable("yt-dlp")
         ffmpeg = executable("ffmpeg")
+        ffprobe = executable("ffprobe")
         if not ytdlp:
-            return self.send_json(503, {"ok": False, "error": "yt-dlp was not found on PATH. Install it and restart this service."}, origin)
+            return self.send_json(503, {"ok": False, "error": "Project-local yt-dlp is missing. Run backend/setup-tools-windows.bat."}, origin)
         if mode == "mp3" and not ffmpeg:
-            return self.send_json(503, {"ok": False, "error": "FFmpeg was not found on PATH. Install it and restart this service."}, origin)
+            return self.send_json(503, {"ok": False, "error": "Project-local FFmpeg is missing. Run backend/setup-tools-windows.bat."}, origin)
 
         job_id = uuid.uuid4().hex
         log_path = OUTPUT_DIR / (job_id + ".log")
         template = str(OUTPUT_DIR / "%(title).180B [%(id)s].%(ext)s")
-        args = [ytdlp, "--no-playlist", "--newline", "--no-warnings", "-o", template,
-                "--print-to-file", "after_move:%(filepath)s", str(log_path)]
+        args = [ytdlp, "--no-playlist", "--newline", "--no-warnings", "-o", template]
+        if ffmpeg:
+            args.extend(["--ffmpeg-location", str(FFMPEG_BIN if (FFMPEG_BIN / "ffmpeg.exe").is_file() else Path(ffmpeg).parent)])
         if os.name == "nt":
             args.append("--windows-filenames")
         if mode == "mp3":
@@ -129,10 +145,11 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     if not executable("yt-dlp"):
-        print("Warning: yt-dlp is not on PATH. Install it before downloading.")
-    if not executable("ffmpeg"):
-        print("Warning: FFmpeg is not on PATH. MP3 extraction needs FFmpeg.")
+        print("yt-dlp is missing. Run backend/setup-tools-windows.bat to place it inside this project.")
+    if not executable("ffmpeg") or not executable("ffprobe"):
+        print("FFmpeg is missing. Run backend/setup-tools-windows.bat to place it inside this project.")
     print("Video Downloader local service listening on http://127.0.0.1:8765")
+    print("Project tools folder: " + str(TOOLS_DIR))
     print("Downloads folder: " + str(OUTPUT_DIR))
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
 
