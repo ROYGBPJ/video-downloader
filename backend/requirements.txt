@@ -1,2 +1,4 @@
-# The local bridge uses only the Python standard library.
-# Install yt-dlp and FFmpeg separately and ensure both executables are on PATH.
+# The localhost bridge uses only the Python standard library.
+# On Windows, run start-windows.bat to download yt-dlp.exe and FFmpeg into
+# the repository's tools/ folder, then start the local service.
+# Python 3 is still required to run the bridge.
