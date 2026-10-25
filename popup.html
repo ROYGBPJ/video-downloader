@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Downloader</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="logo">↓</div>
+      <div><h1>Video Downloader</h1><p>Find media on this page</p></div>
+    </header>
+    <section class="current">
+      <label for="pageUrl">Current page</label>
+      <div class="urlrow"><input id="pageUrl" readonly><button id="scan" class="secondary">Scan</button></div>
+    </section>
+    <div id="notice" class="notice" role="status">Scanning current page…</div>
+    <section class="toolbar">
+      <span id="count">0 media files</span>
+      <button id="downloadAll" disabled>Download all</button>
+    </section>
+    <section id="results" class="results"><p class="empty">Open a page containing a video or audio file, then scan.</p></section>
+    <footer>Downloads files the webpage exposes directly. Some sites use segmented or protected streams that cannot be downloaded as a single media file by a browser extension alone. Only download content you are authorized to save.</footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
