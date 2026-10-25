@@ -18,9 +18,10 @@ A Google Chrome Manifest V3 extension with two download paths:
    - `tools/yt-dlp.exe`
    - `tools/ffmpeg/bin/ffmpeg.exe`
    - `tools/ffmpeg/bin/ffprobe.exe`
-7. Keep the PowerShell window open while using the extension.
-8. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the project folder that directly contains `manifest.json`.
-9. Open a video page, click the extension icon, paste the page URL into **Video or supported site URL**, choose video or MP3, and click **Download with yt-dlp**.
+7. For more reliable YouTube extraction, install Node.js (20.18.1 or newer) and make sure `node.exe` is available on PATH. The backend detects Node.js automatically and passes it to yt-dlp as a JavaScript runtime; Node.js is optional for other supported sites.
+8. Keep the PowerShell window open while using the extension.
+9. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the project folder that directly contains `manifest.json`.
+10. Open a video page, click the extension icon, paste the page URL into **Video or supported site URL**, choose video or MP3, and click **Download with yt-dlp**.
 
 Files and diagnostic logs are saved in your user profile's `Downloads/VideoDownloader` folder. Internet access is needed for the first tool download. The executables are stored locally in the project folder after setup; they are not embedded into Chrome's extension sandbox.
 
