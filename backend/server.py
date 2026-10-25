@@ -24,6 +24,11 @@ def executable(name):
     candidates = []
     if name == "yt-dlp":
         candidates.extend([TOOLS_DIR / "yt-dlp.exe", TOOLS_DIR / "yt-dlp"])
+    elif name == "node":
+        candidates.append(Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "nodejs" / "node.exe")
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            candidates.append(Path(local_app_data) / "Programs" / "nodejs" / "node.exe")
     elif name in ("ffmpeg", "ffprobe"):
         candidates.extend([FFMPEG_BIN / (name + ".exe"), FFMPEG_BIN / name])
     for candidate in candidates:
@@ -85,6 +90,8 @@ class Handler(BaseHTTPRequestHandler):
             "yt_dlp": bool(executable("yt-dlp")),
             "ffmpeg": bool(executable("ffmpeg")),
             "ffprobe": bool(executable("ffprobe")),
+            "node": bool(executable("node")),
+            "node_path": executable("node"),
             "tools_location": str(TOOLS_DIR),
             "output_dir": str(OUTPUT_DIR)
         }, origin)
@@ -125,6 +132,11 @@ class Handler(BaseHTTPRequestHandler):
         log_path = OUTPUT_DIR / (job_id + ".log")
         template = str(OUTPUT_DIR / "%(title).180B [%(id)s].%(ext)s")
         args = [ytdlp, "--no-playlist", "--newline", "--no-warnings", "-o", template]
+        # Modern YouTube extraction may require a JavaScript runtime. Use Node.js
+        # when installed, without making it mandatory for other supported sites.
+        node = executable("node")
+        if node:
+            args.extend(["--js-runtimes", "node:" + node])
         if ffmpeg:
             args.extend(["--ffmpeg-location", str(FFMPEG_BIN if (FFMPEG_BIN / "ffmpeg.exe").is_file() else Path(ffmpeg).parent)])
         if os.name == "nt":
@@ -147,6 +159,10 @@ def main():
         print("yt-dlp is missing. Run backend/setup-and-run-windows.ps1 to place it inside this project.")
     if not executable("ffmpeg") or not executable("ffprobe"):
         print("FFmpeg is missing. Run backend/setup-and-run-windows.ps1 to place it inside this project.")
+    if executable("node"):
+        print("Node.js JavaScript runtime found: " + str(executable("node")))
+    else:
+        print("Node.js was not found. Some YouTube downloads may fail; install Node.js and ensure node.exe is on PATH.")
     print("Video Downloader local service listening on http://127.0.0.1:8765")
     print("Project tools folder: " + str(TOOLS_DIR))
     print("Downloads folder: " + str(OUTPUT_DIR))
