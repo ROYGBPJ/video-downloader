@@ -33,10 +33,14 @@ async function checkBackend() {
     const response = await fetch(BACKEND + "/health", {signal: AbortSignal.timeout(1800)});
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "Backend unavailable");
-    backendStatus.textContent = !data.yt_dlp ? "yt-dlp missing" : (data.ffmpeg ? "Ready" : "FFmpeg missing");
-    backendStatus.classList.toggle("ready", Boolean(data.yt_dlp && (data.ffmpeg || downloadMode.value !== "mp3")));
-    backendDownload.disabled = !data.yt_dlp || (downloadMode.value === "mp3" && !data.ffmpeg);
-    if (!data.yt_dlp || (downloadMode.value === "mp3" && !data.ffmpeg)) setNotice("The local service is running, but a required tool was not found on PATH.", true);
+    const hasYtDlp = Boolean(data.yt_dlp);
+    const hasFfmpeg = Boolean(data.ffmpeg);
+    backendStatus.textContent = !hasYtDlp ? "yt-dlp missing" : (hasFfmpeg ? "Ready" : "FFmpeg missing");
+    backendStatus.classList.toggle("ready", Boolean(hasYtDlp && (hasFfmpeg || downloadMode.value !== "mp3")));
+    backendDownload.disabled = !hasYtDlp || (downloadMode.value === "mp3" && !hasFfmpeg);
+    if (!hasYtDlp || (downloadMode.value === "mp3" && !hasFfmpeg)) {
+      setNotice("A required project tool is missing. Run backend/start-windows.bat to set up yt-dlp and FFmpeg.", true);
+    }
   } catch {
     backendStatus.textContent = "Offline";
     backendStatus.classList.remove("ready");
