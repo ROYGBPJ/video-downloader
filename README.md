@@ -17,8 +17,12 @@ This project is a Chrome Manifest V3 browser extension, not a Python desktop app
 5. Choose the repository folder containing `manifest.json`.
 6. Open a webpage with a directly accessible media file, click the extension icon, then select **Scan** or **Download all**.
 
-## Site compatibility
-Many websites expose ordinary media file URLs. Other sites use segmented streaming, short-lived signed URLs, authentication, or protected playback. A browser extension that only scans page URLs cannot automatically turn every such stream into a downloadable file. YouTube is detected and explained in the popup, but its adaptive streams are not treated as ordinary direct file URLs by this version. Do not use this extension to bypass DRM, access controls, or website restrictions.
+## Site compatibility and testing status
+Many websites expose ordinary media file URLs. Other sites use segmented streaming, short-lived signed URLs, authentication, or protected playback.
+
+**Actual YouTube video extraction is not implemented yet.** YouTube uses adaptive streaming, so its video and audio are not normally available as ordinary direct file links. The extension currently detects YouTube and displays a notice; it does not implement extraction of YouTube's adaptive streams. Successful YouTube downloads have not been verified, and the extension has not been tested in Chrome. Compatibility with other sites depends on whether they expose directly downloadable media URLs.
+
+Do not use this extension to bypass DRM, access controls, or website restrictions.
 
 Only download content you own, have permission to save, or are otherwise authorized to download. Respect applicable law and each site's terms.
 
