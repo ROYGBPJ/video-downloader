@@ -8,14 +8,14 @@
 </head>
 <body>
   <main>
-    <header><div class="logo">↓</div><div><h1>Video Downloader</h1><p>Direct media + yt-dlp backend</p></div></header>
+    <header><div class="logo">↓</div><div><h1>Video Downloader</h1><p>Chrome extension + project-local tools</p></div></header>
     <section class="current">
       <label for="pageUrl">Current page</label>
       <div class="urlrow"><input id="pageUrl" readonly><button id="scan" class="secondary">Scan</button></div>
     </section>
     <section class="backend">
-      <div class="backend-heading"><strong>yt-dlp backend</strong><span id="backendStatus" class="status">Checking…</span></div>
-      <p class="hint">Requires the local companion service, yt-dlp, and FFmpeg.</p>
+      <div class="backend-heading"><strong>yt-dlp downloader</strong><span id="backendStatus" class="status">Checking…</span></div>
+      <p class="hint">yt-dlp and FFmpeg are kept in this project's tools folder. Run backend/start-windows.bat once to download/setup them and start the local service.</p>
       <label for="backendUrl">Video or supported site URL</label>
       <input id="backendUrl" type="url" placeholder="https://www.youtube.com/watch?v=…" autocomplete="url">
       <div class="urlrow"><label class="mode-label" for="downloadMode">Format</label><select id="downloadMode"><option value="video">Best available video</option><option value="mp3">Extract audio to MP3</option></select></div>
