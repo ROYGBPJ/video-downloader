@@ -33,10 +33,10 @@ async function checkBackend() {
     const response = await fetch(BACKEND + "/health", {signal: AbortSignal.timeout(1800)});
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || "Backend unavailable");
-    backendStatus.textContent = data.yt_dlp ? (data.ffmpeg ? "Ready" : "FFmpeg missing") : "yt-dlp missing";
-    backendStatus.classList.toggle("ready", Boolean(data.yt_dlp && data.ffmpeg));
-    backendDownload.disabled = !(data.yt_dlp && data.ffmpeg);
-    if (!data.yt_dlp || !data.ffmpeg) setNotice("Local service is running, but yt-dlp or FFmpeg was not found on PATH.", true);
+    backendStatus.textContent = !data.yt_dlp ? "yt-dlp missing" : (data.ffmpeg ? "Ready" : "FFmpeg missing");
+    backendStatus.classList.toggle("ready", Boolean(data.yt_dlp && (data.ffmpeg || downloadMode.value !== "mp3")));
+    backendDownload.disabled = !data.yt_dlp || (downloadMode.value === "mp3" && !data.ffmpeg);
+    if (!data.yt_dlp || (downloadMode.value === "mp3" && !data.ffmpeg)) setNotice("The local service is running, but a required tool was not found on PATH.", true);
   } catch {
     backendStatus.textContent = "Offline";
     backendStatus.classList.remove("ready");
@@ -100,6 +100,7 @@ async function downloadOne(item) {
     setNotice("Direct download started: " + (item.name || "media file"));
   } catch (error) { setNotice(error.message || "Download failed to start.", true); }
 }
+downloadMode.addEventListener("change", checkBackend);
 backendDownload.addEventListener("click", async () => {
   const url = backendUrl.value.trim();
   if (!url) { setNotice("Enter a video or supported-site URL first.", true); return; }
