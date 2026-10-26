@@ -47,7 +47,11 @@ def safe_http_url(value):
 
 def extension_origin(handler):
     origin = handler.headers.get("Origin", "")
-    return origin.startswith("chrome-extension://") and len(origin) < 256
+    allowed = origin.startswith("chrome-extension://") and len(origin) < 256
+    if not allowed:
+        # Log the exact Origin so rejected extension requests can be diagnosed.
+        print(f"[VideoDownloader] Rejected Origin: {origin!r}", flush=True)
+    return allowed
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "VideoDownloaderLocal/1.2"
