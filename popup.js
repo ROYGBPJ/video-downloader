@@ -41,8 +41,14 @@ async function checkBackend() {
     if (!hasYtDlp || (downloadMode.value === "mp3" && !hasFfmpeg)) {
       setNotice("A required project tool is missing. Run backend/start-windows.bat to set up yt-dlp and FFmpeg.", true);
     }
-  } catch {
-    backendStatus.textContent = "Offline";
+  } catch (error) {
+    console.error("Backend health check failed:", {
+      message: error?.message || String(error),
+      url: BACKEND + "/health",
+      extensionId: chrome.runtime.id,
+      name: error?.name || "Error"
+    });
+    backendStatus.textContent = "Offline: " + (error?.message || String(error));
     backendStatus.classList.remove("ready");
     backendDownload.disabled = true;
   }
@@ -123,6 +129,12 @@ backendDownload.addEventListener("click", async () => {
     if (!response.ok || !data.ok) throw new Error(data.error || "The local service rejected the request.");
     setNotice("Download queued on this computer. Check the VideoDownloader folder in your Downloads directory.");
   } catch (error) {
+    console.error("Backend download request failed:", {
+      message: error?.message || String(error),
+      url: BACKEND + "/download",
+      extensionId: chrome.runtime.id,
+      name: error?.name || "Error"
+    });
     setNotice(error.name === "TimeoutError" ? "The local service did not respond in time. Check that it is running." : (error.message || "Could not reach the local service."), true);
   } finally { await checkBackend(); }
 });
